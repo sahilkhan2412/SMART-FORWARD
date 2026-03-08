@@ -338,9 +338,12 @@ def is_session_active(user):
 # -------- Email Reply --------
 def send_email_reply(email_user, password, to_email, subject, body):
     try:
-
-        to_email = to_email.split("<")[-1].replace(">", "").strip()
-
+        if not to_email:
+            print("sender email missing")
+            return
+        if "<" in to_email:
+            to_email = to_email.split("<")[-1].replace(">", "").strip()
+        
         msg = MIMEText(body)
         msg["From"] = email_user
         msg["To"] = to_email
@@ -461,7 +464,7 @@ def check_single_user(EMAIL, PASSWORD, PHONE,user):
                                 print(f"Sending attachment {index+1}: {file}")
                                 send_whatsapp_media(PHONE, file)
                                 time.sleep(2)
-                                if os.path.exists(file):os.remove
+                                if os.path.exists(file):os.remove(file)
                     else:
 
                         emails_collection.insert_one({

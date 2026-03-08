@@ -5,4 +5,8 @@ gunicorn
 pymongo
 cryptography
 dnspython
+<<<<<<< HEAD
 pillow
+=======
+pillow
+>>>>>>> ebf7b9a (Update SmartForward project)
