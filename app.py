@@ -102,8 +102,8 @@ def send_whatsapp(phone, message, sender=None, subject=None, email_user=None, em
             emails_collection.insert_one({
                 "wa_message_id": message_id,
                 "email_uid": email_uid,
-                "sender": sender,
-                "subject": subject,
+                "sender": sender or "",
+                "subject": subject or "",
                 "email": email_user,
                 "phone": phone
             })
@@ -381,7 +381,7 @@ def move_email(email_user, password, email_uid, folder):
         print("Move email error:", e)
 
 # -------- Check Email --------
-def check_single_user(EMAIL, PASSWORD, PHONE,user):
+def check_single_user(EMAIL, PASSWORD, PHONE, user):
     try:
 
         mail = imaplib.IMAP4_SSL("imap.gmail.com")
@@ -391,13 +391,13 @@ def check_single_user(EMAIL, PASSWORD, PHONE,user):
         status, data = mail.search(None, "UNSEEN")
         email_ids = data[0].split()
 
-        if EMAIL not in last_email_ids:
-            last_email_ids[EMAIL] = None
+        if not email_ids:
+            mail.logout()
+            return
 
-        if email_ids:
+        for latest in email_ids[-5:]:   # last 5 emails process
 
-            latest = email_ids[-1]
-            # ---- Duplicate Email Protection ----
+            # Duplicate protection
             existing = emails_collection.find_one({
                 "email_uid": latest,
                 "phone": PHONE
@@ -405,46 +405,51 @@ def check_single_user(EMAIL, PASSWORD, PHONE,user):
 
             if existing:
                 print("Duplicate email skipped")
-                return
-
-            if latest == last_email_ids[EMAIL]:
-                return
-
-            last_email_ids[EMAIL] = latest
+                continue
 
             status, msg_data = mail.fetch(latest, "(RFC822)")
 
             for response in msg_data:
 
-                if isinstance(response, tuple):
+                if not isinstance(response, tuple):
+                    continue
 
-                    msg = email.message_from_bytes(response[1])
-                    print("DEBUG ATTACHMENT CHECK:")
-                    attachments = get_attachments(msg)
-                    print("ATTACHMENTS:", attachments)
+                msg = email.message_from_bytes(response[1])
 
-                    email_time = parsedate_to_datetime(msg.get("date"))
-                    email_time = email_time.strftime("%d %b %y | %I:%M %p")
+                print("DEBUG ATTACHMENT CHECK:")
+                attachments = get_attachments(msg)
+                print("ATTACHMENTS:", attachments)
 
-                    subject = get_subject(msg)
-                    body = get_email_body(msg)
-                    sender = msg.get("from")
-                    print("EMAIL CHECKED:", subject)
+                email_time = parsedate_to_datetime(msg.get("date"))
+                email_time = email_time.strftime("%d %b %y | %I:%M %p")
 
-                    score = scam_score(subject, body, sender)
+                subject = get_subject(msg)
+                body = get_email_body(msg)
 
-                    preview = body.replace("\n", " ").replace("\r", " ")
-                    preview = preview[:350] + "..." if len(preview) > 350 else preview
+                # -------- Sender Clean --------
+                sender = msg.get("from") or ""
 
-                    users_collection.update_one(
-                        {"phone": PHONE},
-                        {"$set": {
-                            "last_sender_email": sender,
-                            "last_subject": subject
-                        }}
-                    )
+                if "<" in sender:
+                    sender = sender.split("<")[-1].replace(">", "").strip()
 
-                    message = f"""📬 *New Email*
+                print("SENDER EMAIL:", sender)
+
+                print("EMAIL CHECKED:", subject)
+
+                score = scam_score(subject, body, sender)
+
+                preview = body.replace("\n", " ").replace("\r", " ")
+                preview = preview[:350] + "..." if len(preview) > 350 else preview
+
+                users_collection.update_one(
+                    {"phone": PHONE},
+                    {"$set": {
+                        "last_sender_email": sender,
+                        "last_subject": subject
+                    }}
+                )
+
+                message = f"""📬 *New Email*
 👤 *Sender:* {sender}
 📌 *Subject:* {subject}
 ⏰ *Received:* {email_time}
@@ -453,29 +458,40 @@ def check_single_user(EMAIL, PASSWORD, PHONE,user):
 📄 *Preview*
 {preview}
 💬 Reply to this message to respond
-"""                 
-                    if is_session_active(user):
-                        
-                        send_whatsapp(PHONE, message, sender, subject, EMAIL, latest)
-                        if attachments:
-                            print("Total Attachments:", len(attachments))
+"""
+
+                if is_session_active(user):
+
+                    send_whatsapp(PHONE, message, sender, subject, EMAIL, latest)
+
+                    # -------- Send Attachments --------
+                    if attachments:
+                        print("Total Attachments:", len(attachments))
+
+                        time.sleep(2)
+
+                        for index, file in enumerate(attachments):
+
+                            print(f"Sending attachment {index+1}: {file}")
+
+                            send_whatsapp_media(PHONE, file)
+
                             time.sleep(2)
-                            for index, file in enumerate(attachments):
-                                print(f"Sending attachment {index+1}: {file}")
-                                send_whatsapp_media(PHONE, file)
-                                time.sleep(2)
-                                if os.path.exists(file):os.remove(file)
-                    else:
 
-                        emails_collection.insert_one({
-                            "user_id": user["_id"],
-                            "sender": sender,
-                            "subject": subject,
-                            "preview": preview,
-                            "status": "pending"
-                        })
+                            if os.path.exists(file):
+                                os.remove(file)
 
-                        send_reopen_template(PHONE)
+                else:
+
+                    emails_collection.insert_one({
+                        "user_id": user["_id"],
+                        "sender": sender,
+                        "subject": subject,
+                        "preview": preview,
+                        "status": "pending"
+                    })
+
+                    send_reopen_template(PHONE)
 
         mail.logout()
 
@@ -658,18 +674,19 @@ def webhook():
                     })
 
                     if email_data:
-                        threading.Thread(
-                            target=send_email_reply,
-                            args=(
-                                user["email"],
-                                cipher.decrypt(user["app_password"].encode()).decode(),
-                                email_data["sender"],
-                                email_data["subject"],
-                                text
-                            ),
-                            daemon=True
-                        ).start()
-
+                        email_data = email_collection.find_one({"wa_message_id": reply_to_id})
+                        if email_data and email_data.get("sender"):
+                            threading.Thread(
+                                target=send_email_reply,
+                                args=(
+                                    user["email"],
+                                    cipher.decrypt(user["app_password"].encode()).decode(),
+                                    email_data["sender"],
+                                    email_data["subject"],
+                                    text
+                                ),
+                                daemon=True
+                            ).start()
             # BUTTON CLICK
             if msg["type"] == "interactive":
 
