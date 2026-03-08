@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SmartForward</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body><!-- NAVBAR -->
+    <nav>
+        <div class="logo">SmartForward</div>
+        <div class="menu">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="/user">Login</a>
+            <a class="btn" href="/signup-page">Get Started</a>
+        </div>
+    </nav><!-- HERO -->
+    <section class="hero">
+        <h1>Email → WhatsApp Automation</h1>
+        <p>
+            Forward important emails directly to WhatsApp instantly.
+            Never miss anything again.
+        </p>
+        <div class="hero-buttons">
+            <a class="cta" href="/signup-page">Start Free</a>
+            <a class="ghost" href="#features">See Demo</a>
+        </div>
+    </section><!-- FEATURES -->
+    <section class="features" id="features">
+        <h2>Powerful Features</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Instant Forward</h3>
+                <p>Email arrives → WhatsApp message sent instantly.</p>
+            </div>
+            <div class="card">
+                <h3>Attachment Support</h3>
+                <p>PDF, Images and files automatically forwarded.</p>
+            </div>
+            <div class="card">
+                <h3>Multiple Emails</h3>
+                <p>Connect unlimited Gmail accounts.</p>
+            </div>
+            <div class="card">
+                <h3>Secure</h3>
+                <p>Encrypted connections and safe storage.</p>
+            </div>
+            <div class="card">
+                <h3>Real Time Monitoring</h3>
+                <p>SmartForward constantly watches your inbox.</p>
+            </div>
+            <div class="card">
+                <h3>24/7 Automation</h3>
+                <p>Runs automatically without any manual work.</p>
+            </div>
+        </div>
+    </section><!-- HOW IT WORKS -->
+    <section class="how">
+        <h2>How It Works</h2>
+        <div class="steps">
+            <div>
+                <span>1</span>
+                <h3>Connect Gmail</h3>
+                <p>Securely connect your email account.</p>
+            </div>
+            <div>
+                <span>2</span>
+                <h3>Add WhatsApp</h3>
+                <p>Link your WhatsApp number.</p>
+            </div>
+            <div>
+                <span>3</span>
+                <h3>Automation Starts</h3>
+                <p>Emails automatically sent to WhatsApp.</p>
+            </div>
+        </div>
+    </section><!-- PRICING -->
+    <section class="pricing" id="pricing">
+        <h2>Pricing</h2>
+        <div class="price-grid">
+            <div class="price-card">
+                <h3>Free</h3>
+                <h1>₹0</h1>
+                <ul>
+                    <li>1 Email Account</li>
+                    <li>Basic Alerts</li>
+                    <li>Limited Usage</li>
+                </ul><a href="/signup-page">Start</a>
+
+            </div>
+            <div class="price-card popular">
+                <h3>Pro</h3>
+                <h1>₹299</h1>
+                <ul>
+                    <li>Unlimited Emails</li>
+                    <li>Attachments</li>
+                    <li>Priority Processing</li>
+                </ul><a href="/user">Upgrade</a>
+
+            </div>
+        </div>
+    </section><!-- CTA -->
+    <section class="cta-section">
+        <h2>Start Automating Today</h2><a href="/signup-page">Create Free Account</a>
+
+    </section><!-- SIGNUP SECTION -->
+    <!-- FOOTER -->
+    <footer>
+        <p>©️ 2026 SmartForward</p>
+        <p>
+            <a href="/privacy">Privacy Policy</a> |
+            <a href="/terms">Terms</a> |
+            <a href="/delete">Delete Data</a>
+        </p>
+    </footer>
+</body>
+
+</html>

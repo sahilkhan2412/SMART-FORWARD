@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Verify OTP - SmartForward</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body><!-- SIMPLE HEADER -->
+    <nav>
+        <div class="logo">SmartForward</div>
+    </nav>
+
+    <section class="hero">
+
+        <h1>Verify OTP</h1>
+
+        <div class="signup-card">
+
+            <form action="/verify-otp" method="POST">
+
+                <input type="hidden" name="phone" value="{{ phone }}">
+
+                <input name="otp" placeholder="Enter OTP" required>
+
+                <button type="submit">Verify OTP</button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>©️ 2026 SmartForward</p>
+        <p>
+            <a href="/privacy">Privacy Policy</a> |
+            <a href="/terms">Terms</a> |
+            <a href="/delete">Delete Data</a>
+        </p>
+    </footer>
+
+</body>
+
+</html>

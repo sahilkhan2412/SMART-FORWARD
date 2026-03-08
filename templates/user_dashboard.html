@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>User Dashboard - SmartForward</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+    <nav>
+        <div class="logo">SmartForward</div>
+    </nav>
+    <section class="hero">
+        <h1>User Dashboard</h1>
+
+        <div class="signup-card">
+
+            <div class="info">
+                Email: {{ email }}
+            </div>
+
+            <div class="info">
+                Phone: {{ phone }}
+            </div>
+
+            <div class="info">
+                Status: <span class="status">{{ status }}</span>
+            </div>
+
+            <form action="/update-profile" method="POST">
+
+                <input name="phone" placeholder="Update Phone">
+
+                <input type="password" name="app_password" placeholder="Update App Password">
+
+                <p class="warning">
+                    ⚠ Forgot your Gmail App Password?<br>
+                    <a href="https://myaccount.google.com/apppasswords" target="_blank">
+                        Generate New App Password
+                    </a>
+                </p>
+
+                <button>Update Profile</button>
+
+            </form>
+
+            <br>
+
+            <a href="/delete-account" class="delete" onclick="return confirm('Delete account permanently?')">
+                Delete Account
+            </a>
+
+            <br><br>
+
+            <a href="/user-logout">Logout</a>
+
+        </div>
+
+    </section>
+    <footer>
+        <p>©️ 2026 SmartForward</p>
+        <p>
+            <a href="/privacy">Privacy Policy</a> |
+            <a href="/terms">Terms</a> |
+            <a href="/delete">Delete Data</a>
+        </p>
+    </footer>
+</body>
+
+</html>

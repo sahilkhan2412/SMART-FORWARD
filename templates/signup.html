@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Signup - SmartForward</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .password-field {
+            position: relative;
+        }
+
+        .password-field span {
+            position: absolute;
+            right: 12px;
+            top: 12px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+    </style>
+
+</head>
+
+<body><!-- NAVBAR -->
+    <nav>
+        <div class="logo">SmartForward</div>
+        <div class="menu">
+            <a href="/">Home</a>
+            <a href="/#features">Features</a>
+            <a href="/#pricing">Pricing</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+
+        <h1>Create Account</h1>
+
+        <div class="signup-card">
+
+            <form action="/signup" method="POST">
+
+                <input name="email" placeholder="Enter Email Address" required>
+
+                <input id="phone" name="phone" placeholder="Enter WhatsApp Number" required>
+
+                <!-- PASSWORD FIELD WITH SHOW/HIDE -->
+                <div class="password-field">
+                    <input type="password" id="app_password" name="app_password" placeholder="Enter Gmail App Password"
+                        required>
+                    <span onclick="togglePassword()">👁</span>
+                </div>
+
+                <p class="warning">
+                    ⚠ Do NOT use your normal Gmail password.<br>
+                    Generate <b>Google App Password</b> here:<br>
+
+                    <a href="https://myaccount.google.com/apppasswords" target="_blank">
+                        Create App Password
+                    </a>
+                </p>
+
+                <button type="submit">VERIFY NUMBER</button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+    <footer>
+        <p>©️ 2026 SmartForward</p>
+        <p>
+            <a href="/privacy">Privacy Policy</a> |
+            <a href="/terms">Terms</a> |
+            <a href="/delete">Delete Data</a>
+        </p>
+    </footer>
+
+    <script>
+
+        function togglePassword() {
+
+            const passwordInput = document.getElementById("app_password");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+            } else {
+                passwordInput.type = "password";
+            }
+
+        }
+
+        const phoneInput = document.getElementById("phone");
+
+        phoneInput.addEventListener("focus", function () {
+
+            if (!phoneInput.value.startsWith("91")) {
+                phoneInput.value = "91";
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>

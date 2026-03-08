@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Dashboard - SmartForward</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <section class="hero"><img src="{{ url_for('static', filename='sf_logo.png') }}"
+            style="width:80px;border-radius:18px;margin-bottom:10px;">
+
+        <h1>SmartForward Admin</h1>
+        <p style="opacity:0.8">System Analytics & User Control</p><br>
+        <div style="width:220px;margin:auto">
+            <canvas id="userChart"></canvas>
+        </div><br>
+        <p style="font-size:18px">
+            Total Users : <b>{{ total }}</b>
+        </p>
+        <p style="color:#22c55e;font-weight:600">
+            Active Users : {{ active_users }}
+        </p>
+        <p style="color:#ef4444;font-weight:600">
+            Inactive Users : {{ inactive_users }}
+        </p>
+        <p style="color:#f59e0b;font-weight:600">
+            Suspicious Users : {{ suspicious_users }}
+        </p><br>
+        <form method="GET" action="/dashboard" style="margin-bottom:25px"><input type="text" name="search"
+                placeholder="Search user by email or phone"
+                style="padding:10px;border-radius:6px;border:none;width:250px;margin-right:10px">
+
+            <button style="padding:10px 16px;background:#6366f1;border:none;color:white;border-radius:6px">
+                Search
+            </button>
+        </form>
+        <div style="overflow-x:auto">
+            <table style="margin:auto;width:80%;border-collapse:collapse">
+                <tr style="background:#1e293b">
+                    <th style="padding:14px">Email</th>
+                    <th style="padding:14px">Phone</th>
+                    <th style="padding:14px">Status</th>
+                    <th style="padding:14px">Actions</th>
+                </tr>{% for user in users %}
+
+                <tr style="background:rgba(255,255,255,0.05)">
+                    <td style="padding:12px">{{ user.email }}</td>
+                    <td style="padding:12px">{{ user.phone }}</td>
+                    <td style="padding:12px">{% if user.suspicious %}
+
+                        <span style="color:#f59e0b;font-weight:600">
+                            Suspicious
+                        </span>{% elif user.is_activate %}
+
+                        <span style="color:#22c55e;font-weight:600">
+                            Active
+                        </span>{% else %}
+
+                        <span style="color:#ef4444;font-weight:600">
+                            Disabled
+                        </span>{% endif %}
+
+                    </td>
+                    <td style="padding:12px">{% if not user.suspicious %}
+
+                        <a href="/toggle/{{ user._id }}"
+                            style="background:#6366f1;padding:6px 12px;border-radius:6px;text-decoration:none;color:white;margin-right:6px">
+
+                            {% if user.is_activate %}
+                            Toggle Off
+                            {% else %}
+                            Toggle On
+                            {% endif %}
+
+                        </a>{% endif %}
+
+                        <a href="/suspicious/{{ user._id }}"
+                            style="background:#f59e0b;padding:6px 12px;border-radius:6px;text-decoration:none;color:white;margin-right:6px">
+
+                            {% if user.suspicious %}
+                            Unsuspicious
+                            {% else %}
+                            Suspicious
+                            {% endif %}
+
+                        </a><a href="/delete/{{ user._id }}" onclick="return confirm('Delete user?')"
+                            style="background:#ef4444;padding:6px 12px;border-radius:6px;text-decoration:none;color:white">
+                            Delete
+                        </a>
+
+                    </td>
+                </tr>{% endfor %}
+
+            </table>
+        </div><br><br>
+
+        <a href="/logout" class="cta">Logout</a>
+
+    </section>
+    <script>
+
+        const active = {{ active_users | tojson }};
+        const inactive = {{ inactive_users | tojson }};
+        const suspicious = {{ suspicious_users | tojson }};
+
+        const centerText = {
+            id: 'centerText',
+            beforeDraw(chart) {
+
+                const { ctx, width, height } = chart;
+
+                ctx.restore();
+
+                ctx.font = "bold 13px Poppins";
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+
+                ctx.fillText("Active: " + active, width / 2, height / 2 - 12);
+                ctx.fillText("Inactive: " + inactive, width / 2, height / 2 + 2);
+                ctx.fillText("Suspicious: " + suspicious, width / 2, height / 2 + 16);
+
+                ctx.save();
+
+            }
+        };
+
+        const ctx = document.getElementById('userChart');
+
+        new Chart(ctx, {
+
+            type: 'doughnut',
+
+            data: {
+
+                labels: ['Active Users', 'Inactive Users', 'Suspicious Users'],
+
+                datasets: [{
+
+                    data: [active, inactive, suspicious],
+
+                    backgroundColor: [
+                        '#22c55e',
+                        '#ef4444',
+                        '#f59e0b'
+                    ],
+
+                    borderWidth: 2,
+                    borderColor: '#020617',
+                    hoverOffset: 12
+
+                }]
+
+            },
+
+            options: {
+
+                cutout: '70%',
+
+                plugins: {
+
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'white'
+                        }
+                    }
+
+                }
+
+            },
+
+            plugins: [centerText]
+
+        });
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Admin Login - SmartForward</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+    <section class="hero">
+
+        <!-- SmartForward Logo -->
+        <img src="{{ url_for('static', filename='sf_logo.png') }}"
+            style="width:90px;border-radius:20px;margin-bottom:10px;">
+
+        <h1>SmartForward</h1>
+
+        <p>Admin Control Panel</p>
+
+        <div class="signup-card">
+
+            <form method="POST">
+
+                <div class="password-field">
+
+                    <input type="password" id="password" name="password" placeholder="Enter Admin Password" required>
+
+                    <span onclick="togglePassword()">👁</span>
+
+                </div>
+
+                <button>Login</button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+    <script>
+
+        function togglePassword() {
+
+            let pass = document.getElementById("password");
+
+            if (pass.type === "password") {
+                pass.type = "text";
+            } else {
+                pass.type = "password";
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
