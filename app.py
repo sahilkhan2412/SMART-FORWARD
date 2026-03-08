@@ -672,21 +672,19 @@ def webhook():
                     email_data = emails_collection.find_one({
                         "wa_message_id": reply_to_id
                     })
+                    if email_data and email_data.get("sender"):
+                        threading.Thread(
+                            target=send_email_reply,
+                            args=(
+                                user["email"],
+                                cipher.decrypt(user["app_password"].encode()).decode(),
+                                email_data["sender"],
+                                email_data["subject"],
+                                text
+                            ),
+                            daemon=True
+                        ).start()
 
-                    if email_data:
-                        email_data = email_collection.find_one({"wa_message_id": reply_to_id})
-                        if email_data and email_data.get("sender"):
-                            threading.Thread(
-                                target=send_email_reply,
-                                args=(
-                                    user["email"],
-                                    cipher.decrypt(user["app_password"].encode()).decode(),
-                                    email_data["sender"],
-                                    email_data["subject"],
-                                    text
-                                ),
-                                daemon=True
-                            ).start()
             # BUTTON CLICK
             if msg["type"] == "interactive":
 
