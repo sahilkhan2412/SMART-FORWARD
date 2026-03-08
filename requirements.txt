@@ -5,3 +5,4 @@ gunicorn
 pymongo
 cryptography
 dnspython
+pillow
