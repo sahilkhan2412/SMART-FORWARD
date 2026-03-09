@@ -854,7 +854,7 @@ def dashboard():
         total=total,
         active_users=active_users,
         inactive_users=inactive_users,
-        suspicious_users=suspicious_users
+        suspicious_users=suspicious_users,
         now=datetime.utcnow
     )
 
