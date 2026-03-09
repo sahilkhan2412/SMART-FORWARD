@@ -630,7 +630,7 @@ def signup():
             "subscription_start": datetime.utcnow(),
             "subscription_end": None,
             "subscription_status": "active",
-            "created_at": datetime.utcnow
+            "created_at": datetime.utcnow()
         }},
         upsert=True
     )
