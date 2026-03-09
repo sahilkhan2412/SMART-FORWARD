@@ -461,10 +461,26 @@ def check_single_user(EMAIL, PASSWORD, PHONE, user):
 {preview}
 💬 Reply to this message to respond
 """
+                # -------- Subscription limit check --------
 
+                if user.get("emails_used", 0) >= user.get("email_limit", 50):
+
+                    send_whatsapp(
+                        PHONE,
+                        "⚠ Email limit reached.\nUpgrade your SmartForward plan to continue."
+                    )
+
+                    mail.logout()
+                    return
+                
                 if is_session_active(user):
 
                     send_whatsapp(PHONE, message, sender, subject, EMAIL, latest)
+                    # increase email usage
+                    users_collection.update_one(
+                        {"_id": user["_id"]},
+                        {"$inc": {"emails_used": 1}}
+                    )
 
                     # -------- Send Attachments --------
                     if attachments:
@@ -520,6 +536,17 @@ def email_monitor():
     while True:
 
         try:
+            # -------- Monthly email reset --------
+            today = datetime.utcnow()
+
+            if today.day == 1 and today.hour == 0:
+
+                users_collection.update_many(
+                    {},
+                    {"$set": {"emails_used": 0}}
+                )
+
+                print("Monthly email usage reset")
             print("Checking emails...")
             check_all_users()
 
@@ -565,7 +592,15 @@ def signup():
             "otp": otp,
             "otp_expiry": expiry,
             "is_activate": 0,
-            "template_sent":False
+            "template_sent": False,
+
+            # subscription fields
+            "plan": "free",
+            "email_limit": 50,
+            "emails_used": 0,
+            "subscription_start": None,
+            "subscription_end": None,
+            "subscription_status": "active"
         }},
         upsert=True
     )
@@ -921,7 +956,7 @@ def user_dashboard():
 
     status = "ACTIVE" if user.get("is_activate") == 1 else "DISABLED"
 
-    return render_template("user_dashboard.html", email=user["email"], phone=user["phone"], status=status)
+    return render_template("user_dashboard.html", email=user["email"], phone=user["phone"], status=status,plan=user.get("plan","free"),email_used=user.get("emails_used",0),email_limit=user.get("email_limit",50))
 
 # -------- Delete --------
 
@@ -951,7 +986,31 @@ def user_logout():
 
     return redirect("/user")
 
+#------ upgrade-plan-------
 
+@app.route("/upgrade-plan")
+def upgrade_plan():
+
+    if not session.get("user"):
+        return redirect("/user")
+
+    users_collection.update_one(
+        {"_id": ObjectId(session["user"])},
+        {"$set":{
+            "plan":"pro",
+            "email_limit":999999,
+            "subscription_start":datetime.utcnow(),
+            "subscription_end":datetime.utcnow()+timedelta(days=30),
+            "subscription_status":"active"
+        }}
+    )
+
+    return """
+<script>
+alert("Pro Plan Activated");
+window.location.href="/user-dashboard";
+</script>
+"""
 # -------- Update Profile --------
 
 @app.route("/update-profile", methods=["POST"])
