@@ -6,6 +6,7 @@ import email
 import time
 import random
 import os
+import razorpay
 import threading
 import smtplib
 import requests
@@ -27,6 +28,10 @@ PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 MONGO_URI = os.getenv("MONGO_URI")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+RAZORPAY_KEY = os.getenv("RAZORPAY_KEY")
+RAZORPAY_SECRET = os.getenv("RAZORPAY_SECRET")
+
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY, RAZORPAY_SECRET))
 
 # -------- MongoDB --------
 client = MongoClient(
@@ -823,6 +828,25 @@ def webhook():
 
     return "ok"
 
+# -------- Razorpay Webhook --------
+
+@app.route("/razorpay-webhook", methods=["POST"])
+def razorpay_webhook():
+
+    data = request.json
+
+    event = data.get("event")
+
+    if event == "payment.captured":
+
+        payment = data["payload"]["payment"]["entity"]
+
+        order_id = payment["order_id"]
+
+        print("Payment success:", order_id)
+
+    return "ok"
+
 
 # -------- Admin login --------
 
@@ -1116,11 +1140,60 @@ def payment():
 
     plan = session.get("selected_plan")
 
-    return render_template("payment.html", plan=plan)
+    if plan == "basic":
+        amount = 1000
+    elif plan == "pro":
+        amount = 2000
+    else:
+        amount = 0
+
+    order = razorpay_client.order.create({
+        "amount": amount,
+        "currency": "INR",
+        "payment_capture": 1
+    })
+    session["razorpay_order_id"] = order["id"]
+
+    return render_template(
+        "payment.html",
+        plan=plan,
+        amount=amount,
+        order_id=order["id"],
+        razorpay_key=RAZORPAY_KEY
+    )
+    
+#-----verify-payment----
+
+@app.route("/verify-payment", methods=["POST"])
+def verify_payment():
+
+    data = request.json
+
+    payment_id = data.get("razorpay_payment_id")
+    order_id = data.get("razorpay_order_id")
+    signature = data.get("razorpay_signature")
+
+    try:
+
+        razorpay_client.utility.verify_payment_signature({
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": signature
+        })
+
+        session["payment_verified"] = True
+
+        return {"status":"success"}
+
+    except:
+
+        return {"status":"failed"}
 
 #----- payment success------
 @app.route("/payment-success")
 def payment_success():
+    if not session.get("payment_verified"):
+        return redirect("/plan")
 
     if not session.get("user"):
         return redirect("/user")
@@ -1154,9 +1227,9 @@ def payment_success():
     price = 0
 
     if plan == "basic":
-        price = 199
+        price = 10 
     elif plan == "pro":
-        price = 499
+        price = 20 
 
     users_collection.update_one(
         {"_id": user_id},
