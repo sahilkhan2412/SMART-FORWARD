@@ -19,31 +19,45 @@
         <div class="signup-card">
 
             <div class="info">
-                Email: {{ email }}
-            </div>
-
-            <div class="info">
-                Phone: {{ phone }}
-            </div>
-
-            <div class="info">
-                Status: <span class="status">{{ status }}</span>
-            </div>
-            <div class="info">
                 Plan: {{ plan }}
             </div>
+
+            {% if plan != "free" %}
+
+            <div class="info">
+                Plan Started: {{ start }}
+            </div>
+
+            <div class="info">
+                Plan Expiry: {{ end }}
+            </div>
+
+            <div class="info">
+                Days Left: {{ days_left }}
+            </div>
+
+            {% endif %}
 
             <div class="info">
                 Email Usage: {{ emails_used }} / {{ email_limit }}
             </div>
-
             {% if plan == "free" %}
-            <br>
+
             <a href="/plan">
                 <button style="padding:10px 20px;background:#28a745;color:white;border:none;border-radius:6px;">
-                    Upgrade to Pro
+                    Upgrade Plan
                 </button>
             </a>
+
+            {% else %}
+
+            <a href="/plan">
+                <button style="padding:10px 20px;background:#6366f1;color:white;border:none;border-radius:6px;">
+                    Renew Plan
+                </button>
+            </a>
+
+            {% endif %}
             {% endif %}
 
             <form action="/update-profile" method="POST">

@@ -596,9 +596,9 @@ def signup():
 
             # subscription fields
             "plan": "free",
-            "email_limit": 50,
+            "email_limit": 10,
             "emails_used": 0,
-            "subscription_start": None,
+            "subscription_start": datetime.utcnow(),
             "subscription_end": None,
             "subscription_status": "active"
         }},
@@ -947,6 +947,7 @@ def user_login():
 
 @app.route("/user-dashboard")
 def user_dashboard():
+
     if not session.get("user"):
         return redirect("/user")
 
@@ -956,9 +957,47 @@ def user_dashboard():
 
     status = "ACTIVE" if user.get("is_activate") == 1 else "DISABLED"
 
-    return render_template("user_dashboard.html", email=user["email"], phone=user["phone"], status=status,plan=user.get("plan","free"),email_used=user.get("emails_used",0),email_limit=user.get("email_limit",50))
+    plan = user.get("plan","free")
+    start = user.get("subscription_start")
+    end = user.get("subscription_end")
 
-# -------- Delete --------
+    days_left = None
+
+    # ---- Expiry Check ----
+
+    if end and datetime.utcnow() > end:
+
+        users_collection.update_one(
+            {"_id": ObjectId(session["user"])},
+            {"$set":{
+                "plan":"free",
+                "email_limit":5,
+                "subscription_start":None,
+                "subscription_end":None
+            }}
+        )
+
+        plan = "free"
+
+    # ---- Days Left ----
+
+    if end:
+        days_left = (end - datetime.utcnow()).days
+
+    return render_template(
+        "user_dashboard.html",
+        email=user["email"],
+        phone=user["phone"],
+        status=status,
+        plan=plan,
+        start=start,
+        end=end,
+        days_left=days_left,
+        emails_used=user.get("emails_used",0),
+        email_limit=user.get("email_limit",5)
+    )
+    
+#---- delete- account-----
 
 @app.route("/delete-account")
 def delete_account():
