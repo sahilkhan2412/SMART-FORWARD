@@ -1067,10 +1067,20 @@ def subscribe(plan):
 
     session["selected_plan"] = plan
 
-    return redirect("/payment-success")
+    return redirect("/payment")
 
 #----payment-----
+@app.route("/payment")
+def payment():
 
+    if not session.get("user"):
+        return redirect("/user")
+
+    plan = session.get("selected_plan")
+
+    return render_template("payment.html", plan=plan)
+
+#----- payment success------
 @app.route("/payment-success")
 def payment_success():
 
