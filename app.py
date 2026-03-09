@@ -1067,24 +1067,39 @@ def subscribe(plan):
 
 #----payment-----
 
-@app.route("/payment")
-def payment():
-
-    plan = session.get("selected_plan")
-
-    return render_template("payment.html", plan=plan)
-
-
-
 @app.route("/payment-success")
 def payment_success():
 
-    user_id = session["user_id"]
+    if not session.get("user"):
+        return redirect("/user")
+
+    user_id = ObjectId(session["user"])
+
     plan = session.get("selected_plan")
 
-    users.update_one(
-        {"email": session["user"]},
-        {"$set":{"plan": plan}}
+    start_date = datetime.utcnow()
+    end_date = start_date + timedelta(days=30)
+
+    # plan limits
+
+    if plan == "basic":
+        limit = 50
+
+    elif plan == "pro":
+        limit = 999999
+
+    else:
+        limit = 5
+        plan = "free"
+
+    users_collection.update_one(
+        {"_id": user_id},
+        {"$set": {
+            "plan": plan,
+            "email_limit": limit,
+            "subscription_start": start_date,
+            "subscription_end": end_date
+        }}
     )
 
     return redirect("/user-dashboard")
