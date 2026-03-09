@@ -1154,9 +1154,9 @@ def payment_success():
     price = 0
 
     if plan == "basic":
-        price = 99
-    elif plan == "pro":
         price = 199
+    elif plan == "pro":
+        price = 499
 
     users_collection.update_one(
         {"_id": user_id},
