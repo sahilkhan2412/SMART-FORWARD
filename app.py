@@ -613,6 +613,7 @@ def signup():
 
 @app.route("/verify-otp", methods=["POST"])
 def verify_otp():
+
     phone = request.form.get("phone")
     otp = request.form.get("otp")
 
@@ -620,14 +621,17 @@ def verify_otp():
 
     if not user:
         return "User not found"
-    
-    if datetime.utcnow() > user.get("otp_expiry"):
+
+    otp_expiry = user.get("otp_expiry")
+
+    if not otp_expiry:
+        return "OTP expired or invalid"
+
+    if datetime.utcnow() > otp_expiry:
         return "OTP expired"
-    
+
     if user.get("otp") != otp:
         return "Invalid OTP"
-
-
 
     users_collection.update_one(
         {"phone": phone},
