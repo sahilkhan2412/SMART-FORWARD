@@ -384,8 +384,10 @@ table td {
 
 /* Admin Action Buttons */
 
-table a {
-    font-size: 13px;
+table td a {
+    display: inline-block;
+    margin: 4px;
+    font-size: 12px;
     transition: 0.2s;
 }
 
@@ -426,6 +428,22 @@ form input:focus {
     table {
         width: 95% !important;
         font-size: 12px;
+    }
+
+}
+
+/* Admin Table Mobile */
+
+@media(max-width:768px) {
+
+    table {
+        width: 100% !important;
+        font-size: 11px;
+    }
+
+    th,
+    td {
+        padding: 8px !important;
     }
 
 }
