@@ -360,3 +360,72 @@ footer {
     top: 12px;
     cursor: pointer;
 }
+
+/* Admin Dashboard Table */
+
+table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transition: 0.3s;
+}
+
+table th {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+table td {
+    font-size: 14px;
+}
+
+/* Admin Action Buttons */
+
+table a {
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+table a:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* Admin Search */
+
+form input {
+    outline: none;
+    font-family: Poppins;
+}
+
+form input:focus {
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+}
+
+/* Admin Chart Spacing */
+
+#userChart {
+    margin-top: 15px;
+}
+
+/* Admin Mobile Responsive */
+
+@media(max-width:768px) {
+
+    .hero {
+        padding: 80px 10px;
+    }
+
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    table {
+        width: 95% !important;
+        font-size: 12px;
+    }
+
+}
