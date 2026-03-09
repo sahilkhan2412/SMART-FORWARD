@@ -1011,6 +1011,30 @@ alert("Pro Plan Activated");
 window.location.href="/user-dashboard";
 </script>
 """
+
+#----- plan ----
+@app.route("/plan")
+def plans():
+    return render_template("plans.html")
+
+#--- plan select-----
+
+@app.route("/subscribe/<plan>")
+def subscribe(plan):
+
+    session["selected_plan"] = plan
+
+    return redirect("/payment")
+
+#----payment-----
+
+@app.route("/payment")
+def payment():
+
+    plan = session.get("selected_plan")
+
+    return render_template("payment.html", plan=plan)
+
 # -------- Update Profile --------
 
 @app.route("/update-profile", methods=["POST"])

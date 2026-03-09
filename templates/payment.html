@@ -1,0 +1,12 @@
+<h2>Payment Page</h2>
+
+<p>Your Plan: {{ plan }}</p>
+
+<button onclick="payNow()">Pay Now</button>
+
+<script>
+    function payNow() {
+        alert("Payment Successful");
+        window.location.href = "/payment-success";
+    }
+</script>
