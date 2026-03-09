@@ -135,13 +135,18 @@
 
                 ctx.restore();
 
-                ctx.font = "bold 9px Poppins";
+                ctx.font = "bold 20px Poppins";
                 ctx.fillStyle = "white";
                 ctx.textAlign = "center";
 
-                ctx.fillText("Active: " + active, width / 2, height / 2 - 10);
-                ctx.fillText("Inactive: " + inactive, width / 2, height / 2 + 4);
-                ctx.fillText("Suspicious: " + suspicious, width / 2, height / 2 + 18);
+                const total = active + inactive + suspicious;
+
+                ctx.fillText(total, width / 2, height / 2 - 2);
+
+                ctx.font = "11px Poppins";
+                ctx.fillStyle = "#9ca3af";
+
+                ctx.fillText("Total Users", width / 2, height / 2 + 14);
 
                 ctx.save();
 
