@@ -1067,7 +1067,7 @@ def subscribe(plan):
 
     session["selected_plan"] = plan
 
-    return redirect("/payment")
+    return redirect("/payment-success")
 
 #----payment-----
 
