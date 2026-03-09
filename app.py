@@ -649,14 +649,16 @@ def webhook():
 
                     for email in pending_emails:
 
-                        message = f"""
-                    📬 Missed Email
-
-                    Sender: {email['sender']}
-                    Subject: {email['subject']}
-
-                    Reply to respond
-                    """
+                        message = f"""📬 *Missed Email*
+👤 *Sender:* {email['sender']}
+📌 *Subject:* {email['subject']}
+⏰ *Received:* {email['email_time']}
+⚠ *Scam Score:* {email['score']}%
+━━━━━━━━━━━━━━
+📄 *Preview*
+{email['preview']}
+💬 Reply to this message to respond
+"""
 
                         send_whatsapp(sender_phone, message)
 
