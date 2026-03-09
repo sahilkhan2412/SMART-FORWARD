@@ -1245,6 +1245,8 @@ def payment_success():
             }
         }
     )
+    session.pop("payment_verified",None)
+    session.pop("razorpay_order_id",None)
 
     return redirect("/user-dashboard")
 
