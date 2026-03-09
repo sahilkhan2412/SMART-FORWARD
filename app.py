@@ -1,4 +1,5 @@
 # SmartForward - WhatsApp Email Forwarder
+#main
 import imaplib
 import mimetypes
 import email
