@@ -1044,7 +1044,7 @@ def payment_success():
     plan = session.get("selected_plan")
 
     users.update_one(
-        {"_id": ObjectId(user_id)},
+        {"email": session["user"]},
         {"$set":{"plan": plan}}
     )
 
