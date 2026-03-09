@@ -490,8 +490,10 @@ def check_single_user(EMAIL, PASSWORD, PHONE, user):
                         "preview": preview,
                         "status": "pending"
                     })
-
-                    send_reopen_template(PHONE)
+                    if not user.get("template_sent"):
+                        send_reopen_template(PHONE)
+                        
+                        users_collection.update_one({"_id": user["_id"]},{"$set":{"template_sent":True}})
 
         mail.logout()
 
@@ -522,7 +524,7 @@ def email_monitor():
         except Exception as e:
             print("Worker error:", e)
 
-        time.sleep(20)
+        time.sleep(60)
 
 
 # -------- Flask --------
@@ -561,6 +563,7 @@ def signup():
             "otp": otp,
             "otp_expiry": expiry,
             "is_activate": 0
+            "template_sent":False
         }},
         upsert=True
     )
@@ -630,7 +633,7 @@ def webhook():
             print("PHONE:", sender_phone)
             users_collection.update_one(
                 {"phone": sender_phone},
-                {"$set": {"last_user_message": datetime.utcnow()}}
+                {"$set": {"last_user_message": datetime.utcnow(),"template_sent":False}}
             )
 
             user = users_collection.find_one({"phone": sender_phone})
