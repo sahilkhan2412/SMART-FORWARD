@@ -264,7 +264,7 @@ def send_reopen_template(phone):
     }
 
     response = requests.post(url, headers=headers, json=data)
-    print("TEMPLATE RESPONSE:",response.txt)
+    print("TEMPLATE RESPONSE:",response.text)
 
 
 # -------- Email helpers --------
