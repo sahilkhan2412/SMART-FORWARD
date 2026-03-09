@@ -832,7 +832,7 @@ def admin():
 
         password = request.form.get("password")
 
-        if password == ADMIN_PASSWORD
+        if password == ADMIN_PASSWORD:
 
             session["admin"] = True
 
