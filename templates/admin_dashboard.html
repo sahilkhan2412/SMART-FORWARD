@@ -13,7 +13,7 @@
 
         <h1>SmartForward Admin</h1>
         <p style="opacity:0.8">System Analytics & User Control</p><br>
-        <div style="width:220px;margin:auto">
+        <div style="width:280px;margin:auto">
             <canvas id="userChart"></canvas>
         </div><br>
         <p style="font-size:18px">
@@ -135,13 +135,13 @@
 
                 ctx.restore();
 
-                ctx.font = "bold 13px Poppins";
+                ctx.font = "bold 9px Poppins";
                 ctx.fillStyle = "white";
                 ctx.textAlign = "center";
 
-                ctx.fillText("Active: " + active, width / 2, height / 2 - 12);
-                ctx.fillText("Inactive: " + inactive, width / 2, height / 2 + 2);
-                ctx.fillText("Suspicious: " + suspicious, width / 2, height / 2 + 16);
+                ctx.fillText("Active: " + active, width / 2, height / 2 - 10);
+                ctx.fillText("Inactive: " + inactive, width / 2, height / 2 + 4);
+                ctx.fillText("Suspicious: " + suspicious, width / 2, height / 2 + 18);
 
                 ctx.save();
 
