@@ -260,7 +260,7 @@ def send_reopen_template(phone):
         "type": "template",
         "template": {
             "name": "email_alert",
-            "language": {"code": "en_US"}
+            "language": {"code": "en"}
         }
     }
 
