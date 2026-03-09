@@ -855,6 +855,7 @@ def dashboard():
         active_users=active_users,
         inactive_users=inactive_users,
         suspicious_users=suspicious_users
+        now=datetime.utcnow
     )
 
 # -------- Logout --------
@@ -1088,22 +1089,29 @@ def payment_success():
         return redirect("/user")
 
     user_id = ObjectId(session["user"])
-
     plan = session.get("selected_plan")
 
-    start_date = datetime.utcnow()
+    user = users_collection.find_one({"_id": user_id})
+
+    current_end = user.get("subscription_end")
+
+    now = datetime.utcnow()
+
+    # अगर plan active है
+    if current_end and current_end > now:
+        start_date = current_end
+    else:
+        start_date = now
+
     end_date = start_date + timedelta(days=30)
 
     # plan limits
-
     if plan == "basic":
         limit = 50
-
     elif plan == "pro":
         limit = 999999
-
     else:
-        limit = 5
+        limit = 10
         plan = "free"
 
     users_collection.update_one(
@@ -1117,6 +1125,7 @@ def payment_success():
     )
 
     return redirect("/user-dashboard")
+
 # -------- Update Profile --------
 
 @app.route("/update-profile", methods=["POST"])
