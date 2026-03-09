@@ -855,7 +855,7 @@ def dashboard():
         active_users=active_users,
         inactive_users=inactive_users,
         suspicious_users=suspicious_users,
-        now=datetime.utcnow
+        now=datetime.utcnow()
     )
 
 # -------- Logout --------
