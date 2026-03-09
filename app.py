@@ -562,7 +562,7 @@ def signup():
             "phone": phone,
             "otp": otp,
             "otp_expiry": expiry,
-            "is_activate": 0
+            "is_activate": 0,
             "template_sent":False
         }},
         upsert=True
