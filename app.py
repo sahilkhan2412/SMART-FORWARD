@@ -689,7 +689,35 @@ def webhook():
                             ),
                             daemon=True
                         ).start()
+            # TEMPLATE BUTTON CLICK (Open Inbox)
+            if msg["type"] == "button":
 
+                payload = msg["button"]["payload"]
+
+                if payload == "Open Inbox" and user:
+
+                    pending_emails = emails_collection.find({
+                        "user_id": user["_id"],
+                        "status": "pending"
+                    })
+
+                    for email in pending_emails:
+
+                        message = f"""
+            📬 Missed Email
+
+            Sender: {email['sender']}
+            Subject: {email['subject']}
+
+            Reply to respond
+            """
+
+                        send_whatsapp(sender_phone, message)
+
+                        emails_collection.update_one(
+                            {"_id": email["_id"]},
+                            {"$set": {"status": "sent"}}
+                        )
             # BUTTON CLICK
             if msg["type"] == "interactive":
 
