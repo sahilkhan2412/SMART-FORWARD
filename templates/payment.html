@@ -1,12 +1,80 @@
-<h2>Payment Page</h2>
+<!DOCTYPE html>
+<html>
 
-<p>Your Plan: {{ plan }}</p>
+<head>
 
-<button onclick="payNow()">Pay Now</button>
+    <title>Payment</title>
 
-<script>
-    function payNow() {
-        alert("Payment Successful");
-        window.location.href = "/payment-success";
-    }
-</script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+    <nav>
+
+        <div class="logo">SmartForward</div>
+
+        <div class="menu">
+            <a href="/user-dashboard">Dashboard</a>
+        </div>
+
+    </nav>
+
+
+    <section class="pricing">
+
+        <h1>Complete Your Payment</h1>
+
+        <div class="price-grid">
+
+            <div class="price-card popular">
+
+                <h3>Your Selected Plan</h3>
+
+                <h1>{{ plan | capitalize }}</h1>
+
+                <ul>
+
+                    {% if plan == "basic" %}
+                    <li>50 Emails / Day</li>
+                    <li>Priority Support</li>
+                    <li>Fast Forwarding</li>
+                    <li>Price: ₹199 / month</li>
+                    {% endif %}
+
+                    {% if plan == "pro" %}
+                    <li>Unlimited Emails</li>
+                    <li>Premium Support</li>
+                    <li>All Features</li>
+                    <li>Price: ₹499 / month</li>
+                    {% endif %}
+
+                </ul>
+
+                <a onclick="payNow()">Pay Now</a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <script>
+
+        function payNow() {
+
+            alert("Payment Successful");
+
+            window.location.href = "/payment-success";
+
+        }
+
+    </script>
+
+</body>
+
+</html>

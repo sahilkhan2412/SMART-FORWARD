@@ -1,19 +1,94 @@
-<h2>Select Your Plan</h2>
+<!DOCTYPE html>
+<html>
 
-<div class="plan">
-    <h3>Free Plan</h3>
-    <p>₹0 / month</p>
-    <a href="/subscribe/free"><button>Select</button></a>
-</div>
+<head>
+    <title>Select Plan</title>
 
-<div class="plan">
-    <h3>Basic Plan</h3>
-    <p>₹199 / month</p>
-    <a href="/subscribe/basic"><button>Select</button></a>
-</div>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
-<div class="plan">
-    <h3>Pro Plan</h3>
-    <p>₹499 / month</p>
-    <a href="/subscribe/pro"><button>Select</button></a>
-</div>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+    <nav>
+
+        <div class="logo">SmartForward</div>
+
+        <div class="menu">
+            <a href="/user-dashboard">Dashboard</a>
+        </div>
+
+    </nav>
+
+
+    <section class="pricing">
+
+        <h1>Select Your Plan</h1>
+
+        <div class="price-grid">
+
+            <!-- Free Plan -->
+
+            <div class="price-card">
+
+                <h3>Free</h3>
+
+                <h1>₹0</h1>
+
+                <ul>
+                    <li>5 Emails / Day</li>
+                    <li>Basic Support</li>
+                    <li>Single Gmail</li>
+                </ul>
+
+                <a href="/subscribe/free">Start Free</a>
+
+            </div>
+
+
+            <!-- Basic Plan -->
+
+            <div class="price-card popular">
+
+                <h3>Basic</h3>
+
+                <h1>₹199</h1>
+
+                <ul>
+                    <li>50 Emails / Day</li>
+                    <li>Priority Support</li>
+                    <li>Faster Forwarding</li>
+                </ul>
+
+                <a href="/subscribe/basic">Choose Plan</a>
+
+            </div>
+
+
+            <!-- Pro Plan -->
+
+            <div class="price-card">
+
+                <h3>Pro</h3>
+
+                <h1>₹499</h1>
+
+                <ul>
+                    <li>Unlimited Emails</li>
+                    <li>Premium Support</li>
+                    <li>All Features</li>
+                </ul>
+
+                <a href="/subscribe/pro">Go Pro</a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</body>
+
+</html>
