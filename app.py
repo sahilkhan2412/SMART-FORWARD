@@ -263,7 +263,7 @@ def send_reopen_template(phone):
         }
     }
 
-    requests.post(url, headers=headers, json=data)
+    response = requests.post(url, headers=headers, json=data)
     print("TEMPLATE RESPONSE:",response.txt)
 
 
