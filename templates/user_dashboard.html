@@ -41,9 +41,10 @@
             <div class="info">
                 Email Usage: {{ emails_used }} / {{ email_limit }}
             </div>
+
             {% if plan == "free" %}
 
-            <a href="/plan">
+            <a href="/plans">
                 <button style="padding:10px 20px;background:#28a745;color:white;border:none;border-radius:6px;">
                     Upgrade Plan
                 </button>
@@ -51,13 +52,12 @@
 
             {% else %}
 
-            <a href="/plan">
+            <a href="/plans">
                 <button style="padding:10px 20px;background:#6366f1;color:white;border:none;border-radius:6px;">
                     Renew Plan
                 </button>
             </a>
 
-            {% endif %}
             {% endif %}
 
             <form action="/update-profile" method="POST">
