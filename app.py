@@ -531,11 +531,40 @@ def check_all_users():
         check_single_user(EMAIL, PASSWORD, PHONE,user)
 
 
+
+# -------- Subscription Expiry Check --------
+def check_subscription_expiry():
+
+    now = datetime.utcnow()
+
+    expired_users = users_collection.find({
+    "$and": [
+        {"subscription_end": {"$lt": now}},
+        {"subscription_end": {"$ne": None}}
+    ]
+})
+
+    for user in expired_users:
+
+        users_collection.update_one(
+            {"_id": user["_id"]},
+            {"$set":{
+                "plan":"free",
+                "email_limit":10,
+                "subscription_start":None,
+                "subscription_end":None,
+                "subscription_status":"expired"
+            }}
+        )
+
+        print("Subscription expired:", user["email"])
+
 # -------- Background Worker --------
 def email_monitor():
     while True:
 
         try:
+            check_subscription_expiry()
             # -------- Monthly email reset --------
             today = datetime.utcnow()
 
@@ -600,7 +629,8 @@ def signup():
             "emails_used": 0,
             "subscription_start": datetime.utcnow(),
             "subscription_end": None,
-            "subscription_status": "active"
+            "subscription_status": "active",
+            "created_at": datetime.utcnow
         }},
         upsert=True
     )
@@ -802,7 +832,7 @@ def admin():
 
         password = request.form.get("password")
 
-        if password == os.getenv("ADMIN_PASSWORD"):
+        if password == ADMIN_PASSWORD
 
             session["admin"] = True
 
@@ -833,6 +863,25 @@ def dashboard():
         users = list(users_collection.find())
 
     total = users_collection.count_documents({})
+    growth = []
+
+    for i in range(7):
+
+        day = datetime.utcnow() - timedelta(days=i)
+
+        count = users_collection.count_documents({
+            "created_at": {
+                "$gte": day.replace(hour=0, minute=0, second=0),
+                "$lt": day.replace(hour=23, minute=59, second=59)
+            }
+        })
+
+        growth.append(count)
+
+    growth.reverse()
+    revenue = 0
+    for u in users_collection.find():
+        revenue += u.get("total_spent", 0)
 
     active_users = users_collection.count_documents({
         "is_activate": 1,
@@ -855,6 +904,8 @@ def dashboard():
         active_users=active_users,
         inactive_users=inactive_users,
         suspicious_users=suspicious_users,
+        revenue=revenue,
+        growth=growth,
         now=datetime.utcnow()
     )
 
@@ -961,6 +1012,8 @@ def user_dashboard():
     })
 
     status = "ACTIVE" if user.get("is_activate") == 1 else "DISABLED"
+    if user.get("subscription_status") == "expired":
+        status = "EXPIRED"
 
     plan = user.get("plan","free")
     start = user.get("subscription_start")
@@ -968,26 +1021,10 @@ def user_dashboard():
 
     days_left = None
 
-    # ---- Expiry Check ----
-
-    if end and datetime.utcnow() > end:
-
-        users_collection.update_one(
-            {"_id": ObjectId(session["user"])},
-            {"$set":{
-                "plan":"free",
-                "email_limit":5,
-                "subscription_start":None,
-                "subscription_end":None
-            }}
-        )
-
-        plan = "free"
-
     # ---- Days Left ----
 
     if end:
-        days_left = (end - datetime.utcnow()).days
+        days_left = max((end - datetime.utcnow()).days, 0)
 
     return render_template(
         "user_dashboard.html",
@@ -1113,15 +1150,27 @@ def payment_success():
     else:
         limit = 10
         plan = "free"
+        
+    price = 0
+
+    if plan == "basic":
+        price = 99
+    elif plan == "pro":
+        price = 199
 
     users_collection.update_one(
         {"_id": user_id},
-        {"$set": {
-            "plan": plan,
-            "email_limit": limit,
-            "subscription_start": start_date,
-            "subscription_end": end_date
-        }}
+        {
+            "$set": {
+                "plan": plan,
+                "email_limit": limit,
+                "subscription_start": start_date,
+                "subscription_end": end_date
+            },
+            "$inc": {
+                "total_spent": price
+            }
+        }
     )
 
     return redirect("/user-dashboard")

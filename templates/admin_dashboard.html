@@ -14,10 +14,15 @@
         <h1>SmartForward Admin</h1>
         <p style="opacity:0.8">System Analytics & User Control</p><br>
         <div style="width:280px;margin:auto">
-            <canvas id="userChart"></canvas>
+            <div style="width:600px;margin:40px auto">
+                <canvas id="growthChart" height="200"></canvas>
+            </div>
         </div><br>
         <p style="font-size:18px">
             Total Users : <b>{{ total }}</b>
+        </p>
+        <p style="color:#38bdf8;font-weight:600">
+            Total Revenue : ₹ {{ revenue }}
         </p>
         <p style="color:#22c55e;font-weight:600">
             Active Users : {{ active_users }}
@@ -65,7 +70,8 @@
 
                     <td style="padding:12px">
                         {% if user.subscription_end %}
-                        {{ (user.subscription_end - now).days }}
+                        {% set days = (user.subscription_end - now).days %}
+                        {{ days if days > 0 else 0 }}
                         {% else %}
                         -
                         {% endif %}
@@ -201,7 +207,59 @@
             plugins: [centerText]
 
         });
+        const growthData = {{ growth | tojson }};
 
+        const growthCtx = document.getElementById("growthChart");
+
+        new Chart(growthCtx, {
+
+            type: "bar",
+
+            data: {
+
+                labels: ["6d", "5d", "4d", "3d", "2d", "1d", "Today"],
+
+                datasets: [{
+
+                    label: "New Users",
+
+                    data: growthData,
+
+                    backgroundColor: "#6366f1",
+
+                    borderRadius: 8,
+
+                    borderSkipped: false
+
+                }]
+
+            },
+
+            options: {
+
+                plugins: {
+
+                    legend: {
+                        labels: { color: "white" }
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+                        ticks: { color: "white" }
+                    },
+
+                    y: {
+                        ticks: { color: "white" }
+                    }
+
+                }
+
+            }
+
+        });
     </script>
 </body>
 
