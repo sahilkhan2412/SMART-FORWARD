@@ -1035,6 +1035,20 @@ def payment():
 
     return render_template("payment.html", plan=plan)
 
+
+
+@app.route("/payment-success")
+def payment_success():
+
+    user_id = session["user_id"]
+    plan = session.get("selected_plan")
+
+    users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set":{"plan": plan}}
+    )
+
+    return redirect("/user-dashboard")
 # -------- Update Profile --------
 
 @app.route("/update-profile", methods=["POST"])
