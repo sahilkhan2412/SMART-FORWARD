@@ -32,9 +32,6 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 RAZORPAY_KEY = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
-print("RAZORPAY KEY:", RAZORPAY_KEY)
-print("RAZORPAY SECRET:", RAZORPAY_SECRET)
-
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY, RAZORPAY_SECRET))
 
 # -------- MongoDB --------
@@ -815,17 +812,32 @@ def webhook():
 @app.route("/razorpay-webhook", methods=["POST"])
 def razorpay_webhook():
 
-    data = request.json
+    webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
 
+    body = request.data
+    signature = request.headers.get("X-Razorpay-Signature")
+
+    try:
+        razorpay_client.utility.verify_webhook_signature(
+            body,
+            signature,
+            webhook_secret
+        )
+    except razorpay.errors.SignatureVerificationError:
+        return "Invalid signature", 400
+
+    data = request.json
     event = data.get("event")
 
     if event == "payment.captured":
 
         payment = data["payload"]["payment"]["entity"]
 
+        payment_id = payment["id"]
         order_id = payment["order_id"]
+        amount = payment["amount"] / 100
 
-        print("Payment success:", order_id)
+        print("Payment received:", payment_id)
 
     return "ok"
 
@@ -1073,32 +1085,6 @@ def user_logout():
 
     return redirect("/user")
 
-#------ upgrade-plan-------
-
-@app.route("/upgrade-plan")
-def upgrade_plan():
-
-    if not session.get("user"):
-        return redirect("/user")
-
-    users_collection.update_one(
-        {"_id": ObjectId(session["user"])},
-        {"$set":{
-            "plan":"pro",
-            "email_limit":999999,
-            "subscription_start":datetime.utcnow(),
-            "subscription_end":datetime.utcnow()+timedelta(days=30),
-            "subscription_status":"active"
-        }}
-    )
-
-    return """
-<script>
-alert("Pro Plan Activated");
-window.location.href="/user-dashboard";
-</script>
-"""
-
 #----- plan ----
 @app.route("/plan")
 def plans():
@@ -1155,26 +1141,49 @@ def verify_payment():
     order_id = data.get("razorpay_order_id")
     signature = data.get("razorpay_signature")
 
+    # session order check
+    if order_id != session.get("razorpay_order_id"):
+        return {"status": "invalid_order"}
+
     try:
 
+        # verify signature
         razorpay_client.utility.verify_payment_signature({
             "razorpay_order_id": order_id,
             "razorpay_payment_id": payment_id,
             "razorpay_signature": signature
         })
 
+        # fetch payment from razorpay
+        payment = razorpay_client.payment.fetch(payment_id)
+
+        if payment["status"] != "captured":
+            return {"status": "payment_not_captured"}
+
         session["payment_verified"] = True
+        session["payment_id"] = payment_id
 
         return {"status":"success"}
 
-    except:
+    except Exception as e:
+
+        print("Payment verify error:", e)
 
         return {"status":"failed"}
 
 #----- payment success------
 @app.route("/payment-success")
 def payment_success():
+
+    # -------- Basic Security Checks --------
+
     if not session.get("payment_verified"):
+        return redirect("/plan")
+
+    if not session.get("razorpay_order_id"):
+        return redirect("/plan")
+
+    if not session.get("payment_id"):
         return redirect("/plan")
 
     if not session.get("user"):
@@ -1182,14 +1191,30 @@ def payment_success():
 
     user_id = ObjectId(session["user"])
     plan = session.get("selected_plan")
+    payment_id = session.get("payment_id")
+
+    # -------- Payment reuse protection --------
+
+    existing = users_collection.find_one({
+        "last_payment_id": payment_id
+    })
+
+    if existing:
+        return redirect("/plan")
+
+    # -------- Get user --------
 
     user = users_collection.find_one({"_id": user_id})
+
+    if not user:
+        return redirect("/user")
 
     current_end = user.get("subscription_end")
 
     now = datetime.utcnow()
 
-    # अगर plan active है
+    # -------- Subscription start logic --------
+
     if current_end and current_end > now:
         start_date = current_end
     else:
@@ -1197,21 +1222,22 @@ def payment_success():
 
     end_date = start_date + timedelta(days=30)
 
-    # plan limits
-    if plan == "basic":
-        limit = 50
-    elif plan == "pro":
-        limit = 999999
-    else:
-        limit = 10
-        plan = "free"
-        
-    price = 0
+    # -------- Plan Limits --------
 
     if plan == "basic":
-        price = 10 
+        limit = 50
+        price = 10
+
     elif plan == "pro":
-        price = 20 
+        limit = 999999
+        price = 20
+
+    else:
+        limit = 10
+        price = 0
+        plan = "free"
+
+    # -------- Update user plan --------
 
     users_collection.update_one(
         {"_id": user_id},
@@ -1220,15 +1246,21 @@ def payment_success():
                 "plan": plan,
                 "email_limit": limit,
                 "subscription_start": start_date,
-                "subscription_end": end_date
+                "subscription_end": end_date,
+                "last_payment_id": payment_id
             },
             "$inc": {
                 "total_spent": price
             }
         }
     )
-    session.pop("payment_verified",None)
-    session.pop("razorpay_order_id",None)
+
+    # -------- Clear Sessions --------
+
+    session.pop("payment_verified", None)
+    session.pop("razorpay_order_id", None)
+    session.pop("payment_id", None)
+    session.pop("selected_plan", None)
 
     return redirect("/user-dashboard")
 
