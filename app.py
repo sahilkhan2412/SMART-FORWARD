@@ -19,6 +19,7 @@ from bson import ObjectId
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
 from cryptography.fernet import Fernet
+from security_layers import total_security_score
 # -------- Load ENV --------
 load_dotenv()
 
@@ -49,12 +50,6 @@ users_collection.create_index("phone")
 
 # -------- Globals --------
 last_email_ids = {}
-
-SCAM_KEYWORDS = [
-    "urgent", "verify", "account suspended", "click here",
-    "password", "otp", "bank", "login", "reset"
-]
-
 
 # -------- WhatsApp --------
 def send_whatsapp(phone, message, sender=None, subject=None, email_user=None, email_uid=None):
@@ -312,22 +307,6 @@ def get_attachments(msg):
 
     return files
 
-# -------- Scam Score --------
-def scam_score(subject, body, sender):
-    score = 0
-    text = (subject + body).lower()
-
-    for word in SCAM_KEYWORDS:
-        if word in text:
-            score += 10
-
-    if "http://" in body or "https://" in body:
-        score += 25
-
-    if sender and "@gmail.com" not in sender.lower():
-        score += 15
-
-    return min(score, 100)
 
 # -------- Session Check --------
 
@@ -443,7 +422,7 @@ def check_single_user(EMAIL, PASSWORD, PHONE, user):
 
                 print("EMAIL CHECKED:", subject)
 
-                score = scam_score(subject, body, sender)
+                score = total_security_score(subject, body, sender, attachments, msg, db)
 
                 preview = body.replace("\n", " ").replace("\r", " ")
                 preview = preview[:350] + "..." if len(preview) > 350 else preview
