@@ -1123,9 +1123,9 @@ def payment():
     plan = session.get("selected_plan")
 
     if plan == "basic":
-        amount = 1000
+        amount = 10
     elif plan == "pro":
-        amount = 2000
+        amount = 20
     else:
         amount = 0
 
