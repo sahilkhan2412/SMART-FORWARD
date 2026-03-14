@@ -32,6 +32,9 @@ ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 RAZORPAY_KEY = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
+print("RAZORPAY KEY:", RAZORPAY_KEY)
+print("RAZORPAY SECRET:", RAZORPAY_SECRET)
+
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY, RAZORPAY_SECRET))
 
 # -------- MongoDB --------
