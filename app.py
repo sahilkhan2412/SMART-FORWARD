@@ -1132,6 +1132,7 @@ def payment():
         "payment_capture": 1
     })
     session["razorpay_order_id"] = order["id"]
+
     users_collection.update_one(
         {"_id": ObjectId(session["user"])},
         {
