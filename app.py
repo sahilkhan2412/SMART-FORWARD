@@ -45,6 +45,7 @@ client = MongoClient(
 db = client["SmartForward"]
 users_collection = db["users"]
 emails_collection = db["emails"]
+payments_collection = db["payments"]
 emails_collection.create_index("wa_message_id")
 emails_collection.create_index("email_uid")
 users_collection.create_index("phone")
@@ -909,8 +910,8 @@ def dashboard():
 
     growth.reverse()
     revenue = 0
-    for u in users_collection.find():
-        revenue += u.get("total_spent", 0)
+    for p in users_collection.find():
+        revenue += p.get("amount", 0)
 
     active_users = users_collection.count_documents({
         "is_activate": 1,
@@ -1274,6 +1275,13 @@ def payment_success():
             }
         }
     )
+    payments_collection.insert_one({
+    "user_id": user_id,
+    "payment_id": payment_id,
+    "plan": plan,
+    "amount": price,
+    "date": datetime.utcnow()
+    })
 
     # -------- Clear Sessions --------
 
