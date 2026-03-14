@@ -4,7 +4,7 @@ python-dotenv
 pymongo
 cryptography
 Pillow
-razorpay
+razorpay=1.4.2
 joblib
 python-whois
 pyspf
