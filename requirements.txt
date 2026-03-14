@@ -1,9 +1,13 @@
+Flask
 requests
 python-dotenv
-flask
-gunicorn
 pymongo
 cryptography
-dnspython
-pillow
+Pillow
 razorpay
+joblib
+python-whois
+pyspf
+dkimpy
+dnspython
+gunicorn
