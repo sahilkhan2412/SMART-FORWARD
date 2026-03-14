@@ -31,6 +31,7 @@ MONGO_URI = os.getenv("MONGO_URI")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 RAZORPAY_KEY = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+webhook_secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")
 
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY, RAZORPAY_SECRET))
 
@@ -830,14 +831,24 @@ def razorpay_webhook():
     event = data.get("event")
 
     if event == "payment.captured":
-
+        
         payment = data["payload"]["payment"]["entity"]
 
         payment_id = payment["id"]
         order_id = payment["order_id"]
         amount = payment["amount"] / 100
 
-        print("Payment received:", payment_id)
+        print("Payment captured:", payment_id)
+
+        users_collection.update_one(
+            {"razorpay_order_id": order_id},
+            {
+                "$set": {
+                    "payment_status": "captured",
+                    "last_payment_id": payment_id
+                }
+            }
+        )
 
     return "ok"
 
@@ -1121,6 +1132,14 @@ def payment():
         "payment_capture": 1
     })
     session["razorpay_order_id"] = order["id"]
+    users_collection.update_one(
+        {"_id": ObjectId(session["user"])},
+        {
+            "$set": {
+                "razorpay_order_id": order["id"]
+            }
+        }
+    )
 
     return render_template(
         "payment.html",
