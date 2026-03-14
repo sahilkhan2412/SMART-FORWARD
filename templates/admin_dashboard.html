@@ -143,11 +143,10 @@
         const active = {{ active_users | tojson }};
         const inactive = {{ inactive_users | tojson }};
         const suspicious = {{ suspicious_users | tojson }};
+        const growthData = {{ growth | tojson }};
 
         const centerText = {
-
             id: 'centerText',
-
             beforeDraw(chart) {
 
                 const { ctx, width, height } = chart;
@@ -168,12 +167,8 @@
                 ctx.fillText("Total Users", width / 2, height / 2 + 14);
 
                 ctx.save();
-
             }
-
         };
-
-
 
         const ctx = document.getElementById('userChart');
 
@@ -182,47 +177,30 @@
             type: 'doughnut',
 
             data: {
-
                 labels: ['Active Users', 'Inactive Users', 'Suspicious Users'],
-
                 datasets: [{
-
                     data: [active, inactive, suspicious],
-
-                    backgroundColor: [
-                        '#22c55e',
-                        '#ef4444',
-                        '#f59e0b'
-                    ],
-
+                    backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'],
                     borderWidth: 2,
                     borderColor: '#020617',
                     hoverOffset: 12
-
                 }]
-
             },
 
             options: {
-
                 cutout: '70%',
-
                 plugins: {
                     legend: {
                         position: 'bottom',
                         labels: { color: 'white' }
                     }
                 }
-
             },
 
             plugins: [centerText]
 
         });
 
-
-
-        const growthData = {{ growth | tojson }};
 
         const growthCtx = document.getElementById("growthChart");
 
@@ -231,38 +209,24 @@
             type: "bar",
 
             data: {
-
                 labels: ["6d", "5d", "4d", "3d", "2d", "1d", "Today"],
-
                 datasets: [{
-
                     label: "New Users",
-
                     data: growthData,
-
                     backgroundColor: "#6366f1",
-
                     borderRadius: 8,
                     borderSkipped: false
-
                 }]
-
             },
 
             options: {
-
                 plugins: {
                     legend: { labels: { color: "white" } }
                 },
-
                 scales: {
-
                     x: { ticks: { color: "white" } },
-
                     y: { ticks: { color: "white" } }
-
                 }
-
             }
 
         });
