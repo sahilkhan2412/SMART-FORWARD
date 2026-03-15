@@ -707,7 +707,7 @@ def webhook():
                         message = f"""📬 *Missed Email*
 👤 *Sender:* {email['sender']}
 📌 *Subject:* {email['subject']}
-⏰ *Received:* {email['email_time']}
+⏰ *Received:* {email['email_time','unknown']}
 ⚠ *Scam Score:* {email['score']}%
 ━━━━━━━━━━━━━━
 📄 *Preview*
