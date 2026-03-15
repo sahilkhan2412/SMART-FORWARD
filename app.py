@@ -492,7 +492,9 @@ def check_single_user(EMAIL, PASSWORD, PHONE, user):
                         "sender": sender,
                         "subject": subject,
                         "preview": preview,
-                        "status": "pending"
+                        "status": "pending",
+                        "email_time":email_time,
+                        "score":score
                     })
                     if not user.get("template_sent"):
                         send_reopen_template(PHONE)
@@ -705,10 +707,10 @@ def webhook():
                     for email in pending_emails:
 
                         message = f"""📬 *Missed Email*
-👤 *Sender:* {email['sender']}
-📌 *Subject:* {email['subject']}
-⏰ *Received:* {email['email_time','unknown']}
-⚠ *Scam Score:* {email['score']}%
+👤 *Sender:* {email.get('sender','unknown')}
+📌 *Subject:* {email.get('subject','no subject')}
+⏰ *Received:* {email.get('email_time','unknown')}
+⚠ *Scam Score:* {email.get('score',0)}%
 ━━━━━━━━━━━━━━
 📄 *Preview*
 {email['preview']}
@@ -747,11 +749,7 @@ def webhook():
                             daemon=True
                         ).start()
             # TEMPLATE BUTTON CLICK (Open Inbox)
-            if msg["type"] == "button":
-
-                payload = msg["button"]["payload"]
-
-                if payload == "Open Inbox" and user:
+            if msg["type"] == "button" and user:
 
                     pending_emails = emails_collection.find({
                         "user_id": user["_id"],
@@ -763,8 +761,8 @@ def webhook():
                         message = f"""
             📬 Missed Email
 
-            Sender: {email['sender']}
-            Subject: {email['subject']}
+            Sender: {email.get('sender','unknown')}
+            Subject: {emai.get('subject','No subject')}
 
             Reply to respond
             """
