@@ -1,169 +1,186 @@
 body {
+
     margin: 0;
-    font-family: Poppins, sans-serif;
+    font-family: Poppins;
     background: linear-gradient(135deg, #0f172a, #020617);
     color: white;
-    overflow-x: hidden;
+
 }
 
-/* NAVBAR */
-
 nav {
+
     display: flex;
     justify-content: space-between;
-    align-items: center;
     padding: 25px 60px;
-    flex-wrap: wrap;
+    align-items: center;
+
 }
 
 .logo {
+
     font-size: 22px;
     font-weight: 600;
-}
 
-.menu {
-    display: flex;
-    gap: 25px;
-    align-items: center;
-    flex-wrap: wrap;
 }
 
 .menu a {
+
+    margin-left: 25px;
     text-decoration: none;
     color: white;
+
 }
 
 .btn {
+
     background: #6366f1;
     padding: 10px 20px;
     border-radius: 8px;
+
 }
 
-/* HERO */
 
 .hero {
+
     text-align: center;
-    padding: 120px 20px;
-    max-width: 900px;
-    margin: auto;
+    padding: 140px 20px;
+
 }
 
 .hero h1 {
+
     font-size: 55px;
-    line-height: 1.2;
+
 }
 
 .hero p {
-    opacity: .8;
+
+    opacity: 0.8;
     margin-top: 15px;
+
 }
 
 .hero-buttons {
+
     margin-top: 30px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
+
 }
 
 .cta {
+
     background: #6366f1;
     padding: 15px 40px;
     border-radius: 10px;
+    margin-right: 15px;
     text-decoration: none;
     color: white;
+
 }
 
 .ghost {
+
     border: 1px solid white;
     padding: 15px 40px;
     border-radius: 10px;
     text-decoration: none;
     color: white;
+
 }
 
-/* FEATURES */
-
 .features {
-    padding: 100px 20px;
+
+    padding: 100px 80px;
     text-align: center;
-    max-width: 1200px;
-    margin: auto;
+
 }
 
 .grid {
+
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 30px;
     margin-top: 50px;
+
 }
 
 .card {
+
     background: rgba(255, 255, 255, 0.05);
     padding: 35px;
     border-radius: 14px;
     backdrop-filter: blur(10px);
+
 }
 
-/* HOW IT WORKS */
-
 .how {
-    padding: 100px 20px;
+
+    padding: 100px 80px;
     text-align: center;
-    max-width: 1200px;
-    margin: auto;
+
 }
 
 .steps {
+
     display: flex;
-    justify-content: center;
-    gap: 40px;
-    flex-wrap: wrap;
+    justify-content: space-around;
     margin-top: 40px;
+
 }
 
 .steps span {
+
     background: #6366f1;
     padding: 10px 15px;
     border-radius: 50%;
+
 }
 
-/* PRICING */
-
 .pricing {
-    padding: 100px 20px;
+
+    padding: 100px 80px;
     text-align: center;
+
 }
 
 .price-grid {
+
     display: flex;
     justify-content: center;
     gap: 40px;
-    flex-wrap: wrap;
     margin-top: 50px;
+
 }
 
 .price-card {
+
     background: #1e293b;
     padding: 40px;
     border-radius: 16px;
     width: 260px;
+
 }
 
 .price-card h1 {
+
     font-size: 40px;
+
 }
 
 .price-card ul {
+
     list-style: none;
     padding: 0;
+
 }
 
 .price-card li {
+
     margin: 10px 0;
+
 }
 
 .price-card a {
+
     display: block;
     margin-top: 20px;
     background: #6366f1;
@@ -171,58 +188,262 @@ nav {
     border-radius: 8px;
     text-decoration: none;
     color: white;
+
 }
 
 .popular {
+
     border: 2px solid #6366f1;
+
 }
 
-/* CTA */
-
 .cta-section {
+
     text-align: center;
     padding: 120px 20px;
+
 }
 
 .cta-section a {
+
     background: #6366f1;
     padding: 16px 40px;
     border-radius: 10px;
     text-decoration: none;
     color: white;
+
 }
 
-/* FOOTER */
-
 footer {
+
     text-align: center;
     padding: 30px;
     background: #020617;
+
 }
 
-/* MOBILE RESPONSIVE */
+/* Signup Card */
 
-@media (max-width:768px) {
+.signup-card {
+    width: 420px;
+    /* पहले 350 था */
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 35px;
+    border-radius: 10px;
+    /* थोड़ा rectangular */
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
 
-    nav {
-        padding: 20px;
+/* Inputs */
+
+.signup-card input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 6px;
+    font-family: Poppins;
+    font-size: 14px;
+}
+
+/* Button */
+
+.signup-card button {
+    width: 100%;
+    padding: 14px;
+    background: #6366f1;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: Poppins;
+}
+
+/* Warning text */
+
+.warning {
+    font-size: 13px;
+    color: #ffdede;
+    margin-top: -8px;
+    margin-bottom: 14px;
+    font-family: Poppins;
+    line-height: 1.5;
+}
+
+.warning a {
+    color: #38bdf8;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+/* Login text */
+
+.login-text {
+    margin-top: 12px;
+    font-size: 14px;
+    font-family: Poppins;
+}
+
+.info {
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.status {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.delete {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: #ff4d4d;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.price-card {
+    position: relative;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.price-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.price-info {
+    position: absolute;
+    bottom: -150px;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 14px;
+    opacity: 0;
+    transition: 0.3s;
+    pointer-events: none;
+}
+
+.price-card:hover .price-info {
+    opacity: 1;
+    bottom: -170px;
+}
+
+.price-card {
+    transition: 0.3s;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.price-card:hover {
+    transform: translateY(-10px) scale(1.04);
+    border: 2px solid #6ea8ff;
+    box-shadow: 0 0 25px rgba(100, 150, 255, 0.6);
+}
+
+.password-field {
+    position: relative;
+}
+
+.password-field span {
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    cursor: pointer;
+}
+
+/* Admin Dashboard Table */
+
+table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transition: 0.3s;
+}
+
+table th {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+table td {
+    font-size: 14px;
+}
+
+/* Admin Action Buttons */
+
+table td a {
+    display: inline-block;
+    margin: 4px;
+    font-size: 12px;
+    transition: 0.2s;
+}
+
+table a:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* Admin Search */
+
+form input {
+    outline: none;
+    font-family: Poppins;
+}
+
+form input:focus {
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+}
+
+/* Admin Chart Spacing */
+
+#userChart {
+    margin-top: 15px;
+}
+
+/* Admin Mobile Responsive */
+
+@media(max-width:768px) {
+
+    .hero {
+        padding: 80px 10px;
     }
 
     .hero h1 {
-        font-size: 34px;
+        font-size: 32px;
     }
 
-    .grid {
-        grid-template-columns: 1fr;
+    table {
+        width: 95% !important;
+        font-size: 12px;
     }
 
-    .steps {
-        flex-direction: column;
+}
+
+/* Admin Table Mobile */
+
+@media(max-width:768px) {
+
+    table {
+        width: 100% !important;
+        font-size: 11px;
     }
 
-    .price-grid {
-        flex-direction: column;
-        align-items: center;
+    th,
+    td {
+        padding: 8px !important;
     }
 
 }
