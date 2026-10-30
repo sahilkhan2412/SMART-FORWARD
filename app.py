@@ -1334,14 +1334,7 @@ def delete_data():
     return render_template("delete.html")
 
 # -------- Start worker --------
-def start_worker():
-    print("EMAIL WORKER STARTING...")
-    time.sleep(15)
-    print("EMAIL WORKER STARTED...")
-    email_monitor()
 
-
-threading.Thread(target=start_worker, daemon=True).start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
