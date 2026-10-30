@@ -121,7 +121,7 @@ def send_whatsapp(phone, message, sender=None, subject=None, email_user=None, em
 # -------- WhatsApp OTP --------
 
 def send_whatsapp_otp(phone, message):
-    url = f"https://graph.facebook.com/v18.0/{os.getenv('PHONE_NUMBER_ID')}/messages"
+    url = f"https://graph.facebook.com/v25.0/{os.getenv('PHONE_NUMBER_ID')}/messages"
 
     headers = {
         "Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}",
@@ -262,7 +262,7 @@ def send_reopen_template(phone):
         "type": "template",
         "template": {
             "name": "email_alert",
-            "language": {"code": "en"}
+            "language": {"code": "en_us"}
         }
     }
 
@@ -762,7 +762,7 @@ def webhook():
             📬 Missed Email
 
             Sender: {email.get('sender','unknown')}
-            Subject: {emai.get('subject','No subject')}
+            Subject: {email.get('subject','No subject')}
 
             Reply to respond
             """
