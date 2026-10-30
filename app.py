@@ -553,6 +553,7 @@ def email_monitor():
 
         try:
             check_subscription_expiry()
+            print("SUBSCRIPTION CHECK COMPLETED")
             # -------- Monthly email reset --------
             today = datetime.utcnow()
 
@@ -564,6 +565,7 @@ def email_monitor():
                 )
 
                 print("Monthly email usage reset")
+            print("REACHED EMAIL CHECK")
             print("Checking emails...")
             check_all_users()
 
