@@ -1335,7 +1335,9 @@ def delete_data():
 
 # -------- Start worker --------
 def start_worker():
+    print("EMAIL WORKER STARTING...")
     time.sleep(15)
+    print("EMAIL WORKER STARTED...")
     email_monitor()
 
 
