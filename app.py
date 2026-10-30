@@ -313,13 +313,19 @@ def get_attachments(msg):
 # -------- Session Check --------
 
 def is_session_active(user):
-    
+
     last = user.get("last_user_message")
 
+    print("DEBUG LAST USER MESSAGE:", last)
+    print("DEBUG MESSAGE TYPE:", type(last))
+
     if not last:
+        print("SESSION CLOSED: No user message found")
         return False
 
     diff = datetime.utcnow() - last
+
+    print("DEBUG TIME DIFFERENCE:", diff.total_seconds())
 
     return diff.total_seconds() < 86400
 
@@ -458,7 +464,7 @@ def check_single_user(EMAIL, PASSWORD, PHONE, user):
 
                     mail.logout()
                     return
-                
+                print("WHATSAPP SESSION ACTIVE:", is_session_active(user))
                 if is_session_active(user):
 
                     send_whatsapp(PHONE, message, sender, subject, EMAIL, latest)
@@ -676,138 +682,203 @@ def verify_webhook():
     return "Verification failed", 403
 
 
+
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.json
+    data = request.json or {}
 
     try:
-
         entry = data.get("entry", [{}])[0]
         changes = entry.get("changes", [{}])[0]
         value = changes.get("value", {})
 
-        if "messages" in value:
+        if "messages" not in value:
+            return "ok"
 
-            msg = value["messages"][0]
-            sender_phone = msg.get("from")
-            print("USER MESSAGE:", msg)
-            print("PHONE:", sender_phone)
-            users_collection.update_one(
-                {"phone": sender_phone},
-                {"$set": {"last_user_message": datetime.utcnow(),"template_sent":False}}
-            )
+        msg = value["messages"][0]
+        sender_phone = msg.get("from")
+        print("META PHONE LAST 4:", sender_phone[-4:])
 
-            user = users_collection.find_one({"phone": sender_phone})
-            if msg["type"] == "text":
-                text = msg.get("text", {}).get("body", "")
-                if user:
-                    pending_emails = emails_collection.find({
-                        "user_id": user["_id"],
-                        "status": "pending"
-                    })
+        if not sender_phone:
+            print("WEBHOOK ERROR: Sender phone missing")
+            return "ok"
 
-                    for email in pending_emails:
+        print("INCOMING WHATSAPP MESSAGE:", msg.get("type"))
+        print("PHONE LAST 4 DIGITS:", sender_phone[-4:])
 
-                        message = f"""📬 *Missed Email*
-👤 *Sender:* {email.get('sender','unknown')}
-📌 *Subject:* {email.get('subject','no subject')}
-⏰ *Received:* {email.get('email_time','unknown')}
-⚠ *Scam Score:* {email.get('score',0)}%
+        # UPDATE USER SESSION
+        result = users_collection.update_one(
+            {"phone": sender_phone},
+            {
+                "$set": {
+                    "last_user_message": datetime.utcnow(),
+                    "template_sent": False
+                }
+            }
+        )
+
+        print("DATABASE MATCHED:", result.matched_count)
+        print("DATABASE UPDATED:", result.modified_count)
+
+        user = users_collection.find_one({"phone": sender_phone})
+        print("USER FOUND:", user is not None)
+
+        if not user:
+            print("USER NOT FOUND: Phone number mismatch")
+            return "ok"
+
+        # TEXT MESSAGE
+        if msg.get("type") == "text":
+
+            text_body = msg.get("text", {}).get("body", "")
+            context = msg.get("context", {})
+            reply_to_id = context.get("id")
+
+            # SEND PENDING EMAILS
+            pending_emails = emails_collection.find({
+                "user_id": user["_id"],
+                "status": "pending"
+            })
+
+            for email in pending_emails:
+
+                message = f"""📬 *Missed Email*
+
+👤 *Sender:* {email.get('sender', 'unknown')}
+📌 *Subject:* {email.get('subject', 'no subject')}
+⏰ *Received:* {email.get('email_time', 'unknown')}
+⚠ *Scam Score:* {email.get('score', 0)}%
+
 ━━━━━━━━━━━━━━
 📄 *Preview*
-{email['preview']}
-💬 Reply to this message to respond
-"""
+{email.get('preview', '')}
 
-                        send_whatsapp(sender_phone, message)
+💬 Reply to this message to respond."""
 
-                        emails_collection.update_one(
-                            {"_id": email["_id"]},
-                            {"$set": {"status": "sent"}}
-                        )
+                send_whatsapp(
+                    sender_phone,
+                    message,
+                    email.get("sender"),
+                    email.get("subject"),
+                    user.get("email"),
+                    email.get("email_uid")
+                )
 
-            # TEXT MESSAGE
-            if msg["type"] == "text":
+                emails_collection.update_one(
+                    {"_id": email["_id"]},
+                    {"$set": {"status": "sent"}}
+                )
 
-                text = msg.get("text", {}).get("body", "")
-                context = msg.get("context", {})
-                reply_to_id = context.get("id")
-
-                if user and reply_to_id:
-
-                    email_data = emails_collection.find_one({
-                        "wa_message_id": reply_to_id
-                    })
-                    if email_data and email_data.get("sender"):
-                        threading.Thread(
-                            target=send_email_reply,
-                            args=(
-                                user["email"],
-                                cipher.decrypt(user["app_password"].encode()).decode(),
-                                email_data["sender"],
-                                email_data["subject"],
-                                text
-                            ),
-                            daemon=True
-                        ).start()
-            # TEMPLATE BUTTON CLICK (Open Inbox)
-            if msg["type"] == "button" and user:
-
-                    pending_emails = emails_collection.find({
-                        "user_id": user["_id"],
-                        "status": "pending"
-                    })
-
-                    for email in pending_emails:
-
-                        message = f"""
-            📬 Missed Email
-
-            Sender: {email.get('sender','unknown')}
-            Subject: {email.get('subject','No subject')}
-
-            Reply to respond
-            """
-
-                        send_whatsapp(sender_phone, message)
-
-                        emails_collection.update_one(
-                            {"_id": email["_id"]},
-                            {"$set": {"status": "sent"}}
-                        )
-            # BUTTON CLICK
-            if msg["type"] == "interactive":
-
-                button_id = msg["interactive"]["button_reply"]["id"]
+            # EMAIL REPLY
+            if reply_to_id:
 
                 email_data = emails_collection.find_one({
-                    "wa_message_id": msg["context"]["id"]
+                    "wa_message_id": reply_to_id
                 })
 
-                if not email_data:
-                    return "ok"
+                if email_data and email_data.get("sender"):
 
-                email_uid = email_data["email_uid"]
-
-                if button_id == "spam_email":
                     threading.Thread(
-                        target=move_email,
-                        args=(user["email"], cipher.decrypt(user["app_password"].encode()).decode(), email_uid, "spam"),
+                        target=send_email_reply,
+                        args=(
+                            user["email"],
+                            cipher.decrypt(
+                                user["app_password"].encode()
+                            ).decode(),
+                            email_data["sender"],
+                            email_data["subject"],
+                            text_body
+                        ),
                         daemon=True
                     ).start()
 
-                if button_id == "archive_email":
-                    threading.Thread(
-                        target=move_email,
-                        args=(user["email"], cipher.decrypt(user["app_password"].encode()).decode(), email_uid, "archive"),
-                        daemon=True
-                    ).start()
+        # TEMPLATE BUTTON
+        elif msg.get("type") == "button":
 
+            pending_emails = emails_collection.find({
+                "user_id": user["_id"],
+                "status": "pending"
+            })
+
+            for email in pending_emails:
+
+                message = f"""📬 Missed Email
+
+Sender: {email.get('sender', 'unknown')}
+Subject: {email.get('subject', 'No subject')}
+
+Reply to respond."""
+
+                send_whatsapp(
+                    sender_phone,
+                    message,
+                    email.get("sender"),
+                    email.get("subject"),
+                    user.get("email"),
+                    email.get("email_uid")
+                )
+
+                emails_collection.update_one(
+                    {"_id": email["_id"]},
+                    {"$set": {"status": "sent"}}
+                )
+
+        # INTERACTIVE ARCHIVE / SPAM BUTTONS
+        elif msg.get("type") == "interactive":
+
+            interactive = msg.get("interactive", {})
+            button_reply = interactive.get("button_reply", {})
+            button_id = button_reply.get("id")
+
+            context = msg.get("context", {})
+            reply_to_id = context.get("id")
+
+            if not reply_to_id:
+                print("BUTTON ERROR: Original message ID missing")
+                return "ok"
+
+            email_data = emails_collection.find_one({
+                "wa_message_id": reply_to_id
+            })
+
+            if not email_data:
+                print("BUTTON ERROR: Email mapping not found")
+                return "ok"
+
+            email_uid = email_data.get("email_uid")
+
+            if not email_uid:
+                print("BUTTON ERROR: Email UID missing")
+                return "ok"
+
+            if button_id in ["spam_email", "archive_email"]:
+
+                folder = (
+                    "spam"
+                    if button_id == "spam_email"
+                    else "archive"
+                )
+
+                threading.Thread(
+                    target=move_email,
+                    args=(
+                        user["email"],
+                        cipher.decrypt(
+                            user["app_password"].encode()
+                        ).decode(),
+                        email_uid,
+                        folder
+                    ),
+                    daemon=True
+                ).start()
+
+                print("EMAIL ACTION STARTED:", folder)
 
     except Exception as e:
-        print("Webhook error:", e)
+        print("WEBHOOK ERROR:", str(e))
 
     return "ok"
+
 
 # -------- Razorpay Webhook --------
 
@@ -1334,7 +1405,12 @@ def delete_data():
     return render_template("delete.html")
 
 # -------- Start worker --------
+def start_worker():
+    time.sleep(15)
+    email_monitor()
 
+
+threading.Thread(target=start_worker, daemon=True).start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
